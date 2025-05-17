@@ -43,15 +43,20 @@ func (v *Variable) Copy() *Variable {
 	return variable
 }
 
+
 // Accessors
+
+// Number of values left in domain
 func (v *Variable) Size() int {
 	return v.domain.Size()
 }
 
+// all values in domain
 func (v *Variable) Values() []int {
 	return v.domain.values
 }
 
+// assignment is remaining value in domain + variable set to assigned. otherwise, 0 representing unassigned variable
 func (v *Variable) Assignment() int {
 	if v.assigned && v.Size() == 1 {
 		return v.Values()[0]
@@ -60,7 +65,9 @@ func (v *Variable) Assignment() int {
 	return 0
 }
 
+
 // Mutators
+
 func (v *Variable) AssignValue(value int) {
 	if !v.changeable { return }
 
@@ -80,5 +87,10 @@ func (v *Variable) RemoveValueFromDomain(value int) {
 	if v.domain.Remove(value) {
 		v.modified = true
 	}
+}
+
+
+func (v *Variable) String() string {
+	return "variable String() stud"
 }
 
