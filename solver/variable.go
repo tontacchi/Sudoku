@@ -4,7 +4,7 @@ package solver
 Represents a CSP variable
 */
 type Variable struct {
-	domain Domain
+	domain *Domain
 
 	row   int
 	col   int
@@ -15,25 +15,37 @@ type Variable struct {
 	changeable bool
 }
 
+func NewVariable(values []int, row, col, block int) *Variable {
+	variable := &Variable{
+		domain:     NewDomain(values...),
+		row:        row,
+		col:        col,
+		block:      block,
+		changeable: len(values) > 1,
+		assigned:   len(values) == 1,
+		modified:   len(values) == 1,
+	}
+
+	return variable
+}
+
+func (v *Variable) Copy() *Variable {
+	variable := &Variable{
+		domain:     v.domain.Copy(),
+		row:        v.row,
+		col:        v.col,
+		block:      v.block,
+		assigned:   v.assigned,
+		modified:   v.modified,
+		changeable: v.changeable,
+	}
+
+	return variable
+}
+
 // Accessors
 func (v *Variable) Size() int {
 	return v.domain.Size()
-}
-
-func (v *Variable) Assigned() bool {
-	return v.assigned
-}
-
-func (v *Variable) Modified() bool {
-	return v.modified
-}
-
-func (v *Variable) Changeable() bool {
-	return v.changeable
-}
-
-func (v *Variable) Domain() Domain {
-	return v.domain
 }
 
 func (v *Variable) Values() []int {
@@ -41,8 +53,32 @@ func (v *Variable) Values() []int {
 }
 
 func (v *Variable) Assignment() int {
-	if v.assigned == false {
+	if v.assigned && v.Size() == 1 {
+		return v.Values()[0]
+	}
 
+	return 0
+}
+
+// Mutators
+func (v *Variable) AssignValue(value int) {
+	if !v.changeable { return }
+
+	v.domain = NewDomain()
+	v.assigned, v.modified = true, true
+}
+
+func (v *Variable) Unassign() {
+	if v.changeable {
+		v.assigned = false
+	}
+}
+
+func (v *Variable) RemoveValueFromDomain(value int) {
+	if !v.changeable { return }
+
+	if v.domain.Remove(value) {
+		v.modified = true
 	}
 }
 
