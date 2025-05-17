@@ -2,7 +2,7 @@ package solver
 
 import (
 	"slices"
-	"fmt"
+	// "fmt"
 )
 
 // Represents set of all possible assignable to variable
