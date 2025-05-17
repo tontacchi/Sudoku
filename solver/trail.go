@@ -1,5 +1,7 @@
 package solver
 
+import "slices"
+
 type trailEntry struct {
 	variable *Variable
 	domain   *Domain
@@ -17,6 +19,15 @@ func NewTrail() *Trail {
 	return &Trail{
 		stack:   []trailEntry{},
 		markers: []int{},
+	}
+}
+
+func (t *Trail) Copy() *Trail {
+	return &Trail{
+		stack:     slices.Clone(t.stack),
+		markers:   slices.Clone(t.markers),
+		numPushes: t.numPushes,
+		numUndoes: t.numUndoes,
 	}
 }
 
