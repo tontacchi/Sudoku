@@ -1,72 +1,76 @@
 package solver
 
-/*
-Represents variable's possible assignable values
-*/
+import (
+	"slices"
+	"fmt"
+)
+
+// Represents set of all possible assignable to variable
 type Domain struct {
 	values   []int
 	modified bool
 }
 
-func (d *Domain) InitValues(values []int) {
-	d.values = make([]int, len(values))
-
-	for i, item := range values {
-		d.values[i] = item
+func NewDomain(values ...int) *Domain {
+	domain := &Domain{
+		values:   []int{},
+		modified: false,
 	}
 
-	d.modified = false
+	domain.values = append(domain.values, values...)
+
+	return domain
+}
+
+func (d *Domain) Copy() *Domain {
+	domainCopy := &Domain{
+		values:   slices.Clone(d.values),
+		modified: false,
+	}
+
+	return domainCopy
 }
 
 // Accessors
 func (d *Domain) Contains(value int) bool {
-	for item := range d.values {
-		if item == value {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(d.values, value)
 }
 
 func (d *Domain) Size() int {
 	return len(d.values)
 }
 
-func (d *Domain) IsEmpty() bool {
-	return d.Size() == 0
+func (d *Domain) Empty() bool {
+	return len(d.values) == 0
 }
 
-func (d *Domain) HasBeenModified() bool {
+func (d *Domain) Modified() bool {
 	return d.modified
 }
 
-// Modifiers
-func (d *Domain) Add(value int) bool {
-	for _, item := range d.values {
-		if item == value { return false }
+// Mutators
+func (d *Domain) Add(value int) {
+	if !d.Contains(value) {
+		d.values = append(d.values, value)
 	}
-
-	d.values = append(d.values, value)
-	return true
 }
 
 func (d *Domain) Remove(value int) bool {
+	if !d.Contains(value) { return false }
+
 	for index, item := range d.values {
 		if item == value {
-			d.values = append(d.values[:index], d.values[index:]...)
-			return true
+			d.values = append(d.values[:index], d.values[index+1:]...)
+			d.modified = true
+
+			break
 		}
 	}
 
-	return false
+	return true
 }
 
-func (d *Domain) SetModifiedTrue() {
-	d.modified = true
-}
-
-func (d *Domain) SetModifiedFalse() {
-	d.modified = false
+func (d *Domain) SetModified(modifer bool) {
+	d.modified = modifer
 }
 
