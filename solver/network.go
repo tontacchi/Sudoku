@@ -5,12 +5,6 @@ import (
 	"fmt"
 )
 
-/*
-TODO:
-- NewNetworkFromBoard()
-- String()
-*/
-
 type Network struct {
 	variables   []*Variable
 	constraints []Constraint
@@ -151,9 +145,23 @@ func (n *Network) GetModifiedConstraints() []Constraint {
 }
 
 func (n *Network) String() string {
-	res := fmt.Sprintf("")
+	// variables
+	res := fmt.Sprintf("%d Variables {", len(n.variables))	
+	for index, variable := range n.variables {
+		if index > 0 {
+			res += ", "
+		}
 
+		res += variable.String()
+	}
+	res += "\n"
 
+	// constriants
+	res += fmt.Sprintf("%d Constraints {", len(n.constraints))
+	for _, constraint := range n.constraints {
+		res += constraint.String() + "\n"
+	}
+	res += "}"
 
 	return res
 }

@@ -1,5 +1,7 @@
 package solver
 
+import "fmt"
+
 /*
 Represents a CSP variable
 */
@@ -91,6 +93,6 @@ func (v *Variable) RemoveValueFromDomain(value int) {
 
 
 func (v *Variable) String() string {
-	return "variable String() stud"
+	return fmt.Sprintf("row: %d, col: %d, block: %d, value: %d", v.row, v.col, v.block, v.Assignment())
 }
 
