@@ -11,25 +11,25 @@ import (
 
 // Represents a Sudoku board
 type Board struct {
-	boxRows  int
-	boxCols  int
+	BoxRows  int
+	BoxCols  int
 	boardLen int
-	cells    [][]int
+	Cells    [][]int
 }
 
-func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
-	boardLen := boxRows * boxCols
+func NewRandomBoard(BoxRows, BoxCols, numHints int) *Board {
+	boardLen := BoxRows * BoxCols
 
 	board := &Board{
-		boxRows:  boxRows,
-		boxCols:  boxCols,
+		BoxRows:  BoxRows,
+		BoxCols:  BoxCols,
 		boardLen: boardLen,
-		cells:    make([][]int, boardLen),
+		Cells:    make([][]int, boardLen),
 	}
 	
 	// initalize board matrix
 	for index := range boardLen {
-		board.cells[index] = make([]int, boardLen)
+		board.Cells[index] = make([]int, boardLen)
 	}
 
 	// seed automatically set as of go 1.24
@@ -40,8 +40,8 @@ func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
 		row, col := rand.IntN(boardLen), rand.IntN(boardLen)
 		value := rand.IntN(boardLen + 1)
 
-		if board.cells[row][col] == 0 && board.isValidPlacement(row, col, value) {
-			board.cells[row][col] = value
+		if board.Cells[row][col] == 0 && board.isValidPlacement(row, col, value) {
+			board.Cells[row][col] = value
 			numHints--
 		}
 	}
@@ -49,10 +49,14 @@ func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
 	return board
 }
 
+func (b *Board) BoardLen() int {
+	return b.boardLen
+}
+
 func (b *Board) String() string {
 	res := ""
 
-	for _, row := range b.cells {
+	for _, row := range b.Cells {
 		for _, value := range row {
 			res += strconv.Itoa(value)
 			res += " "
@@ -68,18 +72,18 @@ func (b *Board) String() string {
 func (b *Board) isValidPlacement(row, col, value int) bool {
 	// row & col check: value doesn't elsewhere in row or col
 	for check := range b.boardLen {
-		if b.cells[row][check] == value || b.cells[check][col] == value {
+		if b.Cells[row][check] == value || b.Cells[check][col] == value {
 			return false
 		}
 	}
 
 	// box check: value doesn't appear elsewhere in its smaller box
-	startRow := (row / b.boxRows) * b.boxRows
-	startCol := (col / b.boxCols) * b.boxCols
+	startRow := (row / b.BoxRows) * b.BoxRows
+	startCol := (col / b.BoxCols) * b.BoxCols
 
-	for r := startRow; r < startRow + b.boxRows; r++ {
-		for c := startCol; c < startCol + b.boxCols; c++ {
-			if b.cells[r][c] == value {
+	for r := startRow; r < startRow + b.BoxRows; r++ {
+		for c := startCol; c < startCol + b.BoxCols; c++ {
+			if b.Cells[r][c] == value {
 				return false
 			}
 		}

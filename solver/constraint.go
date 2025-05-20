@@ -4,7 +4,7 @@ package solver
 type Constraint interface {
 	Variables()   []*Variable
 	IsSatisfied() bool
-	isModified()  bool
+	IsModified()  bool
 	String()      string
 }
 
