@@ -8,25 +8,25 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 	boardLen := board.BoardLen()
 	tempVars := make([]*solver.Variable, 0, boardLen * boardLen)
 
+	// var domain []int
+	//
+	// if value == 0 {
+	// 	for i := 1; i <= boardLen; i++ {
+	// 		domain = append(domain, i)
+	// 	}
+	// } else {
+	// 	domain = []int{value}
+	// }
+
 	// 1) build variables from board cells
 	for row := range boardLen {
 		for col := range boardLen {
-			val := board.Cells[row][col]
-
-			var domain []int
-
-			if val == 0 {
-				for i := 1; i <= boardLen; i++ {
-					domain = append(domain, i)
-				}
-			} else {
-				domain = []int{val}
-			}
+			value    := board.Cells[row][col]
+			domain   := domainFor(value, boardLen)
 			boxIndex := (row / board.BoxRows) * board.BoxCols + (col / board.BoxCols)
-
 			variable := solver.NewVariable(domain, row, col, boxIndex)
-			tempVars = append(tempVars, variable)
 
+			tempVars = append(tempVars, variable)
 			network.AddVariable(variable)
 		}
 	}
@@ -52,3 +52,17 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 
 	return network
 }
+
+func domainFor(value, size int) []int {
+	if value != 0 {
+		return []int{value}
+	}
+
+	domain := make([]int, size)
+	for i := range size {
+		domain[i] = i + 1
+	}
+
+	return domain
+}
+
