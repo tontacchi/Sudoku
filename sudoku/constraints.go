@@ -2,6 +2,8 @@ package sudoku
 
 import "sudoku-csp/solver"
 
-func MakeAllDiffConstraint(variables []*solver.Variable) {
-
+func MakeAllDiff(variables []*solver.Variable) solver.Constraint {
+	return solver.NewAllDiffConstraint(variables)
 }
+
+

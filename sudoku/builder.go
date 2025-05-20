@@ -45,7 +45,7 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 	// 3) assign constraints for rows, cols, & boxes
 	for _, group := range []map[int][]*solver.Variable{rowGroups, colGroups, boxGroups} {
 		for _, vars := range group {
-			constraint := solver.NewAllDiffConstraint(vars)
+			constraint := MakeAllDiff(vars)
 			network.AddConstraint(constraint)
 		}
 	}
