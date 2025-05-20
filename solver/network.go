@@ -1,7 +1,6 @@
 package solver
 
 import (
-	"sudoku/sudoku"
 	"fmt"
 )
 
@@ -11,61 +10,13 @@ type Network struct {
 	varToConst  map[*Variable][]Constraint
 }
 
-func NewNetworkFromBoard(board *sudoku.Board) *Network {
-	network := &Network{
+func NewNetwork() *Network {
+	return &Network {
 		variables:   []*Variable{},
 		constraints: []Constraint{},
-		varToConst:  make(map[*Variable][]Constraint),
+		varToConst:  map[*Variable][]Constraint{},
 	}
-
-	boardLen := board.BoardLen()
-	tempVars := make([]*Variable, 0, boardLen * boardLen)
-
-	// 1) build variables from board cells
-	for row := range boardLen {
-		for col := range boardLen {
-			val := board.Cells[row][col]
-
-			var domain []int
-
-			if val == 0 {
-				for i := 1; i <= boardLen; i++ {
-					domain = append(domain, i)
-				}
-			} else {
-				domain = []int{val}
-			}
-			boxIndex := (row / board.BoxRows) * board.BoxCols + (col / board.BoxCols)
-
-			variable := NewVariable(domain, row, col, boxIndex)
-			tempVars = append(tempVars, variable)
-
-			network.AddVariable(variable)
-		}
-	}
-
-	// 2) group variables by rows, cols, & boxes
-	rowGroups := make(map[int][]*Variable)
-	colGroups := make(map[int][]*Variable)
-	boxGroups := make(map[int][]*Variable)
-
-	for _, variable := range tempVars {
-		rowGroups[variable.row] = append(rowGroups[variable.row], variable)
-		rowGroups[variable.col] = append(colGroups[variable.col], variable)
-		rowGroups[variable.block] = append(boxGroups[variable.block], variable)
-	}
-
-	// 3) assign constraints for rows, cols, & boxes
-	for _, group := range []map[int][]*Variable{rowGroups, colGroups, boxGroups} {
-		for _, vars := range group {
-			constraint := NewAllDiffConstraint(vars)
-			network.AddConstraint(constraint)
-		}
-	}
-
-	return network
 }
-
 
 // Mutators
 

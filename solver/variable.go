@@ -8,9 +8,9 @@ Represents a CSP variable
 type Variable struct {
 	domain *Domain
 
-	row   int
-	col   int
-	block int
+	Row   int
+	Col   int
+	Block int
 
 	assigned   bool
 	modified   bool
@@ -20,9 +20,9 @@ type Variable struct {
 func NewVariable(values []int, row, col, block int) *Variable {
 	variable := &Variable{
 		domain:     NewDomain(values...),
-		row:        row,
-		col:        col,
-		block:      block,
+		Row:        row,
+		Col:        col,
+		Block:      block,
 		changeable: len(values) > 1,
 		assigned:   len(values) == 1,
 		modified:   len(values) == 1,
@@ -34,9 +34,9 @@ func NewVariable(values []int, row, col, block int) *Variable {
 func (v *Variable) Copy() *Variable {
 	variable := &Variable{
 		domain:     v.domain.Copy(),
-		row:        v.row,
-		col:        v.col,
-		block:      v.block,
+		Row:        v.Row,
+		Col:        v.Col,
+		Block:      v.Block,
 		assigned:   v.assigned,
 		modified:   v.modified,
 		changeable: v.changeable,
@@ -93,6 +93,6 @@ func (v *Variable) RemoveValueFromDomain(value int) {
 
 
 func (v *Variable) String() string {
-	return fmt.Sprintf("row: %d, col: %d, block: %d, value: %d", v.row, v.col, v.block, v.Assignment())
+	return fmt.Sprintf("Row: %d, Col: %d, Block: %d, value: %d", v.Row, v.Col, v.Block, v.Assignment())
 }
 
