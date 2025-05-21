@@ -2,7 +2,7 @@ package solver
 
 import (
 	"time"
-	"slices"
+	"sort"
 )
 
 // Strategy Interfaces
@@ -93,6 +93,8 @@ func (bt *BacktrackSolver) Solve(timeLeft time.Duration) int {
 
 // Default Strategy Implementations
 
+// 1) Variable Selectors
+
 type FirstUnassigned struct{}
 
 func (FirstUnassigned) Select(network *Network) *Variable {
@@ -104,9 +106,9 @@ func (FirstUnassigned) Select(network *Network) *Variable {
 }
 
 
-type MinimumRemainingValue struct{}
+type MRV struct{}
 
-func (MinimumRemainingValue) Select(network *Network) *Variable {
+func (MRV) Select(network *Network) *Variable {
 	var bestVar *Variable
 
 	minSize := -1
@@ -125,6 +127,48 @@ func (MinimumRemainingValue) Select(network *Network) *Variable {
 }
 
 
+type MRVWithDegree struct{}
+
+func (MRVWithDegree) Select(network *Network) *Variable {
+	var candidates []*Variable
+	minDomainSize := -1
+
+	for _, variable := range network.variables {
+		if variable.assigned { continue }
+
+		size := variable.Size()
+		if minDomainSize == -1 || size < minDomainSize {
+			minDomainSize = size
+			candidates = []*Variable{variable}
+		} else {
+			candidates = append(candidates, variable)
+		}
+	}
+
+	if len(candidates) == 1 { return candidates[0] }
+
+	// tie-breaker: highest unassigned neighbor count
+	var best *Variable
+	maxDegree := -1
+
+	for _, variable := range candidates {
+		degree := 0
+
+		for _, neighbor := range network.GetNeighbors(variable) {
+			if !neighbor.assigned { degree++ }
+		}
+
+		if degree > maxDegree {
+			maxDegree, best = degree, variable
+		}
+	}
+
+	return best
+}
+
+
+// 2) Value Selectors
+
 type DefaultValOrder struct{}
 
 func (DefaultValOrder) OrderVals(variable *Variable, network *Network) []int {
@@ -132,6 +176,49 @@ func (DefaultValOrder) OrderVals(variable *Variable, network *Network) []int {
 	return append([]int{}, values...)
 }
 
+
+type LeastConstrainingValue struct{}
+
+func (LeastConstrainingValue) OrderVals(variable *Variable, network *Network) []int {
+	neighbors   := network.GetNeighbors(variable)
+	valueImpact := make(map[int]int)
+
+	for _, value := range variable.Values() {
+		impact := 0
+
+		for _, neighbor := range neighbors {
+			if !neighbor.assigned && neighbor.domain.Contains(value) {
+				impact++
+			}
+		}
+
+		valueImpact[value] = impact
+	}
+
+	type valueImpactPair struct {
+		value  int
+		impact int
+	}
+	var pairs []valueImpactPair
+
+	for value, impact := range valueImpact {
+		pairs = append(pairs, valueImpactPair{value, impact})
+	}
+
+	sort.Slice(pairs, func(left, right int) bool {
+		return pairs[left].impact < pairs[right].impact
+	})
+
+	ordered := make([]int, len(pairs))
+	for index, pair := range pairs {
+		ordered[index] = pair.value
+	}
+
+	return ordered
+}
+
+
+// 3) Consistency Checkers
 
 type BasicCheck struct{}
 
@@ -166,6 +253,60 @@ func (ForwardChecking) Enforce(network *Network, trail *Trail) bool {
 	}
 
 	for _, constraint := range network.constraints {
+		if !constraint.IsSatisfied() { return false }
+	}
+
+	return true
+}
+
+
+type NorvigCheck struct{}
+
+func (NorvigCheck) Enforce(network *Network, trail *Trail) bool {
+	// 1) forward checking
+	for _, constraint := range network.GetModifiedConstraints() {
+		for _, variable := range constraint.Variables() {
+			if !variable.assigned { continue }
+
+			value := variable.Assignment()
+
+			for _, neighbor := range network.GetNeighbors(variable) {
+				if !neighbor.domain.Contains(value) { continue }
+
+				trail.Push(neighbor)
+				neighbor.domain.Remove(value)
+
+				if neighbor.domain.Empty() { return false }
+
+				neighbor.modified = true
+			}
+		}
+	}
+
+	// 2) only-choice rule
+	for _, constraint := range network.Constraints() {
+		valueVariablesMap := make(map[int][]*Variable)
+
+		for _, variable := range constraint.Variables() {
+			if variable.assigned { continue }
+
+			for _, value := range variable.domain.values {
+				valueVariablesMap[value] = append(valueVariablesMap[value], variable)
+			}
+		}
+
+		for value, variables := range valueVariablesMap {
+			if len(variables) != 1 { continue }
+
+			leadVariable := variables[0]
+			trail.Push(leadVariable)
+
+			leadVariable.AssignValue(value)
+			leadVariable.assigned = true
+		}
+	}
+
+	for _, constraint := range network.Constraints() {
 		if !constraint.IsSatisfied() { return false }
 	}
 
