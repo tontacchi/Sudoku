@@ -313,3 +313,44 @@ func (NorvigCheck) Enforce(network *Network, trail *Trail) bool {
 	return true
 }
 
+
+type ArcConsistency struct{}
+
+func (ArcConsistency) Enforce(network *Network, trail *Trail) bool {
+	queue := []*Variable{}
+
+	for _, variable := range network.variables {
+		if !variable.assigned { continue }	
+
+		queue = append(queue, variable)
+	}
+
+	for len(queue) > 0 {
+		variable := queue[0]
+		value    := variable.Assignment()
+		queue     = queue[1:]
+	
+		for _, neighbor := range network.GetNeighbors(variable) {
+			if neighbor.assigned || !neighbor.domain.Contains(value) { continue }
+
+			trail.Push(neighbor)
+			neighbor.domain.Remove(value)
+
+			if neighbor.domain.Empty() { return false }
+			neighbor.modified = true
+
+			if neighbor.Size() != 1 { continue }
+
+			valueToAssign := neighbor.Values()[0]
+			neighbor.AssignValue(valueToAssign)
+			queue = append(queue, neighbor)
+		}
+	}
+
+	for _, constraint := range network.constraints {
+		if !constraint.IsSatisfied() { return false }
+	}
+
+	return true
+}
+
