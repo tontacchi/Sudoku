@@ -2,6 +2,7 @@ package solver
 
 import (
 	"time"
+	"slices"
 )
 
 // Strategy Interfaces
@@ -103,9 +104,9 @@ func (FirstUnassigned) Select(network *Network) *Variable {
 }
 
 
-type MostRecentValue struct{}
+type MinimumRemainingValue struct{}
 
-func (MostRecentValue) Select(network *Network) *Variable {
+func (MinimumRemainingValue) Select(network *Network) *Variable {
 	var bestVar *Variable
 
 	minSize := -1
@@ -121,5 +122,53 @@ func (MostRecentValue) Select(network *Network) *Variable {
 	}
 
 	return bestVar
+}
+
+
+type DefaultValOrder struct{}
+
+func (DefaultValOrder) OrderVals(variable *Variable, network *Network) []int {
+	values := variable.Values()
+	return append([]int{}, values...)
+}
+
+
+type BasicCheck struct{}
+
+func (BasicCheck) Enforce(network *Network, trail *Trail) bool {
+	for _, constraint := range network.constraints {
+		if !constraint.IsSatisfied() { return false }
+	}
+
+	return true
+}
+
+
+type ForwardChecking struct{}
+
+func (ForwardChecking) Enforce(network *Network, trail *Trail) bool {
+	for _, modifiedConstraint := range network.GetModifiedConstraints() {
+		for _, variable := range modifiedConstraint.Variables() {
+			if !variable.assigned { continue }
+
+			value := variable.Assignment()
+			for _, neighbor := range network.GetNeighbors(variable) {
+				if !neighbor.domain.Contains(value) { continue }
+
+				trail.Push(neighbor)
+				neighbor.domain.Remove(value)
+
+				if neighbor.domain.Empty() { return false }
+
+				neighbor.modified = true
+			}
+		}
+	}
+
+	for _, constraint := range network.constraints {
+		if !constraint.IsSatisfied() { return false }
+	}
+
+	return true
 }
 
