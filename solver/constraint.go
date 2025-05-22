@@ -38,17 +38,15 @@ func (c *AllDiffConstraint) IsModified() bool {
 }
 
 func (c *AllDiffConstraint) IsSatisfied() bool {
-	set := make(map[int]bool)
+	seen := make(map[int]bool)
 
 	for _, variable := range c.variables {
 		if !variable.assigned { continue }
 
 		assignment := variable.Assignment()
-		if set[assignment] {
-			return false
-		}
+		if seen[assignment] { return false }
 
-		set[assignment] = true
+		seen[assignment] = true
 	}
 
 	return true

@@ -3,6 +3,7 @@ package solver
 import (
 	"time"
 	"sort"
+	"fmt"
 )
 
 // Strategy Interfaces
@@ -52,11 +53,11 @@ func NewBacktrackSolver(
 // Solver Logic
 
 // check that this can be converted into a boolean function. we only return -1 and 0? so it can be true and false?
-func (bt *BacktrackSolver) Solve(timeLeft time.Duration) int {
+func (bt *BacktrackSolver) Solve(timeLeft time.Duration) bool {
 	if timeLeft <= 0 {
-		return -1
+		return false
 	} else if bt.HasSolution {
-		return 0
+		return true
 	}
 	
 	start := time.Now()
@@ -64,7 +65,7 @@ func (bt *BacktrackSolver) Solve(timeLeft time.Duration) int {
 	variable := bt.Select(bt.Network)
 	if variable == nil {
 		bt.HasSolution = true
-		return 0
+		return true
 	}
 
 	for _, value := range bt.OrderValues(variable, bt.Network) {
@@ -75,19 +76,20 @@ func (bt *BacktrackSolver) Solve(timeLeft time.Duration) int {
 		if bt.Enforce(bt.Network, bt.Trail) {
 			remainingTime := timeLeft - time.Since(start)
 
-			if bt.Solve(remainingTime) == -1 {
-				return -1
+			if bt.Solve(remainingTime) == false {
+				return false
 			}
 		}
 
 		if bt.HasSolution {
-			return 0
+			return true
 		}
 
 		bt.Trail.Undo()
 	}
 
-	return 0
+	fmt.Println("darn no solution")
+	return false
 }
 
 

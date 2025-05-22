@@ -34,6 +34,10 @@ func NewEmptyBoard(boxRows, boxCols int) *Board {
 }
 
 func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
+	if numHints > (boxRows * boxRows * boxCols * boxCols) {
+		numHints = (boxRows * boxRows * boxCols * boxCols)
+	}
+
 	boardLen := boxRows * boxCols
 
 	board := &Board{

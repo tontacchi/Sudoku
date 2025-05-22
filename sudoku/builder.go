@@ -2,7 +2,7 @@ package sudoku
 
 import (
 	"sudoku-csp/solver"
-	"math/rand/v2"
+	"fmt"
 )
 
 func NewNetworkFromBoard(board *Board) *solver.Network {
@@ -10,16 +10,6 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 
 	boardLen := board.BoardLen()
 	tempVars := make([]*solver.Variable, 0, boardLen * boardLen)
-
-	// var domain []int
-	//
-	// if value == 0 {
-	// 	for i := 1; i <= boardLen; i++ {
-	// 		domain = append(domain, i)
-	// 	}
-	// } else {
-	// 	domain = []int{value}
-	// }
 
 	// 1) build variables from board cells
 	for row := range boardLen {
@@ -41,9 +31,11 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 
 	for _, variable := range tempVars {
 		rowGroups[variable.Row] = append(rowGroups[variable.Row], variable)
-		rowGroups[variable.Col] = append(colGroups[variable.Col], variable)
-		rowGroups[variable.Block] = append(boxGroups[variable.Block], variable)
+		colGroups[variable.Col] = append(colGroups[variable.Col], variable)
+		boxGroups[variable.Block] = append(boxGroups[variable.Block], variable)
 	}
+
+	fmt.Printf("vars in row: %d, vars in col: %d, vars in box: %d\n", len(rowGroups), len(colGroups), len(boxGroups))
 
 	// 3) assign constraints for rows, cols, & boxes
 	for _, group := range []map[int][]*solver.Variable{rowGroups, colGroups, boxGroups} {
@@ -77,56 +69,6 @@ func NewBoardFromNetwork(network *solver.Network, boxRows, boxCols int) *Board {
 		boardLen: boardLen,
 		Cells:    cells,
 	}
-}
-
-func NewForwardCheckGeneratedBoard(boxRows, boxCols, clueCount int) *Board {
-	board   := NewEmptyBoard(boxRows, boxCols)
-	network := NewNetworkFromBoard(board)
-	trail   := solver.NewTrail()
-
-	varSelector := solver.MRV{}
-	valSelector := solver.LeastConstrainingValue{}
-	checker     := solver.ForwardChecking{}
-
-	numAssigned := 0
-
-	// go 1.24 -> seed automatically set
-
-	for numAssigned < clueCount {
-		variable := varSelector.Select(network)
-
-		// no more assignable values
-		if variable == nil { break }
-
-		values := valSelector.OrderValues(variable, network)
-		rand.Shuffle(len(values), func(left, right int) {
-			values[left], values[right] = values[right], values[left]
-		})
-
-		isAssigned := false
-		for _, value := range values {
-			trail.PlaceMarker()
-			trail.Push(variable)
-
-			variable.AssignValue(value)
-
-			if checker.Enforce(network, trail) {
-				numAssigned++
-				isAssigned = true
-				break
-			}
-
-			trail.Undo()
-		}
-
-		// cannot assign to variable safely -> backtrack
-		if !isAssigned {
-			break
-		}
-	}
-
-	finalBoard := NewBoardFromNetwork(network, boxRows, boxCols)
-	return finalBoard
 }
 
 func domainFor(value, size int) []int {

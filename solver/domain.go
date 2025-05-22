@@ -2,7 +2,7 @@ package solver
 
 import (
 	"slices"
-	// "fmt"
+	"fmt"
 )
 
 // Represents set of all possible assignable to variable
@@ -55,8 +55,9 @@ func (d *Domain) Add(value int) {
 	}
 }
 
+// modified -> true when values emptied out
 func (d *Domain) Remove(value int) bool {
-	if !d.Contains(value) { return false }
+	if d.Empty() || !d.Contains(value) { return false }
 
 	for index, item := range d.values {
 		if item == value {
@@ -72,5 +73,19 @@ func (d *Domain) Remove(value int) bool {
 
 func (d *Domain) SetModified(modifer bool) {
 	d.modified = modifer
+}
+
+
+/*
+Domain:
+  values:   [1 2 3 ...]
+  modified: true
+*/
+func (d *Domain) String() string {
+	res := "Domain:\n"
+	res += fmt.Sprintf("  values:   %v\n", d.values)
+	res += fmt.Sprintf("  modified: %v", d.modified)
+
+	return res
 }
 
