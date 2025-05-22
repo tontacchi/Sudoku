@@ -67,13 +67,16 @@ func (v *Variable) Assignment() int {
 	return 0
 }
 
+func (v *Variable) Assigned() bool {
+	return v.assigned
+}
 
 // Mutators
 
 func (v *Variable) AssignValue(value int) {
 	if !v.changeable { return }
 
-	v.domain = NewDomain()
+	v.domain = NewDomain(value)
 	v.assigned, v.modified = true, true
 }
 

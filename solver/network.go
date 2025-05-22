@@ -103,7 +103,7 @@ func (n *Network) String() string {
 			res += ", "
 		}
 
-		res += variable.String()
+		res += variable.String() + "\n"
 	}
 	res += "\n"
 

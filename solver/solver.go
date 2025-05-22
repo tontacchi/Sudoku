@@ -53,7 +53,7 @@ func NewBacktrackSolver(
 
 // check that this can be converted into a boolean function. we only return -1 and 0? so it can be true and false?
 func (bt *BacktrackSolver) Solve(timeLeft time.Duration) int {
-	if timeLeft <= time.Minute {
+	if timeLeft <= 0 {
 		return -1
 	} else if bt.HasSolution {
 		return 0
@@ -145,7 +145,9 @@ func (MRVWithDegree) Select(network *Network) *Variable {
 		}
 	}
 
-	if len(candidates) == 1 { return candidates[0] }
+	if len(candidates) == 1 {
+		return candidates[0]
+	}
 
 	// tie-breaker: highest unassigned neighbor count
 	var best *Variable
@@ -171,7 +173,7 @@ func (MRVWithDegree) Select(network *Network) *Variable {
 
 type DefaultValOrder struct{}
 
-func (DefaultValOrder) OrderVals(variable *Variable, network *Network) []int {
+func (DefaultValOrder) OrderValues(variable *Variable, network *Network) []int {
 	values := variable.Values()
 	return append([]int{}, values...)
 }
@@ -179,7 +181,7 @@ func (DefaultValOrder) OrderVals(variable *Variable, network *Network) []int {
 
 type LeastConstrainingValue struct{}
 
-func (LeastConstrainingValue) OrderVals(variable *Variable, network *Network) []int {
+func (LeastConstrainingValue) OrderValues(variable *Variable, network *Network) []int {
 	neighbors   := network.GetNeighbors(variable)
 	valueImpact := make(map[int]int)
 

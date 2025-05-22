@@ -17,12 +17,28 @@ type Board struct {
 	Cells    [][]int
 }
 
-func NewRandomBoard(BoxRows, BoxCols, numHints int) *Board {
-	boardLen := BoxRows * BoxCols
+func NewEmptyBoard(boxRows, boxCols int) *Board {
+	board := &Board{
+		BoxRows:  boxRows,
+		BoxCols:  boxCols,
+		boardLen: boxRows * boxCols,
+		Cells:    make([][]int, boxRows * boxCols),
+	}
+
+	// initalize rows
+	for row := range board.boardLen {
+		board.Cells[row] = make([]int, board.boardLen)
+	}
+
+	return board
+}
+
+func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
+	boardLen := boxRows * boxCols
 
 	board := &Board{
-		BoxRows:  BoxRows,
-		BoxCols:  BoxCols,
+		BoxRows:  boxRows,
+		BoxCols:  boxCols,
 		boardLen: boardLen,
 		Cells:    make([][]int, boardLen),
 	}
@@ -32,8 +48,7 @@ func NewRandomBoard(BoxRows, BoxCols, numHints int) *Board {
 		board.Cells[index] = make([]int, boardLen)
 	}
 
-	// seed automatically set as of go 1.24
-
+	// go 1.24 -> seed automatically set
 
 	// fill board w/ randomly placed hints
 	for numHints > 0 {
