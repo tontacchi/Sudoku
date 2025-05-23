@@ -17,6 +17,7 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 			value    := board.Cells[row][col]
 			domain   := domainFor(value, boardLen)
 			boxIndex := (row / board.BoxRows) * board.BoxCols + (col / board.BoxCols)
+			fmt.Printf("(%d, %d) assigned box %d\n", row, col, boxIndex)
 			variable := solver.NewVariable(domain, row, col, boxIndex)
 
 			tempVars = append(tempVars, variable)
@@ -36,6 +37,11 @@ func NewNetworkFromBoard(board *Board) *solver.Network {
 	}
 
 	fmt.Printf("vars in row: %d, vars in col: %d, vars in box: %d\n", len(rowGroups), len(colGroups), len(boxGroups))
+	for i := range boardLen {
+		fmt.Printf("Row %d has %d vars\n", i, len(rowGroups[i]))
+		fmt.Printf("Col %d has %d vars\n", i, len(colGroups[i]))
+		fmt.Printf("Box %d has %d vars\n", i, len(boxGroups[i]))
+	}
 
 	// 3) assign constraints for rows, cols, & boxes
 	for _, group := range []map[int][]*solver.Variable{rowGroups, colGroups, boxGroups} {

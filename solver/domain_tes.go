@@ -42,15 +42,15 @@ func TestAdd(t *testing.T) {
 	message := fmt.Sprintf("\ndomain is empty: %v\n%v\n", domain.Empty(), domain.String())
 	t.Logf(message)
 
-	domain.Add(1)
+	domain.Expand(1)
 	message = fmt.Sprintf("\nAdded 1\ndomain is empty: %v\n%v\n", domain.Empty(), domain.String())
 	t.Logf(message)
 
-	domain.Add(2)
+	domain.Expand(2)
 	message = fmt.Sprintf("\nAdded 2\ndomain is empty: %v\n%v\n", domain.Empty(), domain.String())
 	t.Logf(message)
 
-	domain.Add(1)
+	domain.Expand(1)
 	message = fmt.Sprintf("\nAdded 1 again\ndomain is empty: %v\n%v\n", domain.Empty(), domain.String())
 	t.Logf(message)
 }
@@ -62,8 +62,8 @@ func TestRemove(t *testing.T) {
 	message := fmt.Sprintf("\nvalue was removed: %v\ndomain is empty: %v\n%v\n", popped, domain.Empty(), domain.String())
 	t.Log(message)
 	
-	domain.Add(3)
-	domain.Add(4)
+	domain.Expand(3)
+	domain.Expand(4)
 	message = fmt.Sprintf("\ndomain is empty: %v\n%v\n", domain.Empty(), domain.String())
 	t.Log(message)
 
@@ -87,7 +87,7 @@ func TestContains(t *testing.T) {
 	message := fmt.Sprintf("\nempty domain contains 1: %v\n", check)
 	t.Log(message)
 
-	domain.Add(1)
+	domain.Expand(1)
 	message = fmt.Sprintf("\nadded 1\n%v\n", domain.values)
 	t.Log(message)
 

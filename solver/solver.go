@@ -3,7 +3,7 @@ package solver
 import (
 	"time"
 	"sort"
-	"fmt"
+	// "fmt"
 )
 
 // Strategy Interfaces
@@ -76,8 +76,8 @@ func (bt *BacktrackSolver) Solve(timeLeft time.Duration) bool {
 		if bt.Enforce(bt.Network, bt.Trail) {
 			remainingTime := timeLeft - time.Since(start)
 
-			if bt.Solve(remainingTime) == false {
-				return false
+			if bt.Solve(remainingTime) {
+				return true
 			}
 		}
 
@@ -88,7 +88,7 @@ func (bt *BacktrackSolver) Solve(timeLeft time.Duration) bool {
 		bt.Trail.Undo()
 	}
 
-	fmt.Println("darn no solution")
+	// fmt.Println("darn no solution")
 	return false
 }
 
