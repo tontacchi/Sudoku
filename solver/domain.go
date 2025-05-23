@@ -49,7 +49,7 @@ func (d *Domain) Modified() bool {
 }
 
 // Mutators
-func (d *Domain) Add(value int) {
+func (d *Domain) Expand(value int) {
 	if !d.Contains(value) {
 		d.values = append(d.values, value)
 	}
