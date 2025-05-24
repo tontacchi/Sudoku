@@ -2,11 +2,11 @@ package sudoku
 
 import (
 	// "os"
-	// "strings"
-	"strconv"
+	"strings"
+	// "strconv"
 	"math/rand/v2"
 	// "time"
-	// "fmt"
+	"fmt"
 )
 
 // Represents a Sudoku board
@@ -73,17 +73,40 @@ func (b *Board) BoardLen() int {
 }
 
 func (b *Board) String() string {
-	res := ""
+	maxVal   := b.boardLen
+	digitLen := len(fmt.Sprintf("%d", maxVal))
 
-	for _, row := range b.Cells {
-		for _, value := range row {
-			res += strconv.Itoa(value)
-			res += " "
+	var builder strings.Builder
+	for row := range b.boardLen {
+		for col := range b.boardLen {
+			value := b.Cells[row][col]
+
+			// display cell content
+			if value == 0 {
+				builder.WriteString(fmt.Sprintf("%*s", digitLen, "_"))
+			} else {
+				builder.WriteString(fmt.Sprintf("%*d", digitLen, value))
+			}
+
+			// display separator
+			atBoxBorder := (col + 1) % b.BoxCols == 0 && col != b.boardLen - 1
+			if atBoxBorder {
+				builder.WriteString(" | ")
+			} else {
+				builder.WriteString(" ")
+			}
 		}
-		res += "\n"
+		builder.WriteString("\n")
+
+		// horizontal box separator
+		atBoxBottom := (row + 1) % b.BoxRows == 0 && row != b.boardLen - 1
+		if atBoxBottom {
+			totalWidth := b.boardLen * (digitLen + 1) + (b.BoxCols - 1) * 3
+			builder.WriteString(strings.Repeat("-", totalWidth) + "\n")
+		}
 	}
 
-	return res
+	return builder.String()
 }
 
 //---[ Internal Helpers ]-------------------------------------------------------
