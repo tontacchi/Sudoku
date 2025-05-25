@@ -48,8 +48,8 @@ func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
 	}
 	
 	// initalize board matrix
-	for index := range boardLen {
-		board.Cells[index] = make([]int, boardLen)
+	for row := range boardLen {
+		board.Cells[row] = make([]int, boardLen)
 	}
 
 	// go 1.24 -> seed automatically set
@@ -68,6 +68,8 @@ func NewRandomBoard(boxRows, boxCols, numHints int) *Board {
 	return board
 }
 
+// Accessors
+
 func (b *Board) BoardLen() int {
 	return b.boardLen
 }
@@ -75,15 +77,19 @@ func (b *Board) BoardLen() int {
 func (b *Board) String() string {
 	maxVal   := b.boardLen
 	digitLen := len(fmt.Sprintf("%d", maxVal))
+	blankSymbol := strings.Repeat("~", digitLen)
 
 	var builder strings.Builder
 	for row := range b.boardLen {
+		// padding on the side
+		builder.WriteString(strings.Repeat(" ", digitLen))
+
 		for col := range b.boardLen {
 			value := b.Cells[row][col]
 
 			// display cell content
 			if value == 0 {
-				builder.WriteString(fmt.Sprintf("%*s", digitLen, "_"))
+				builder.WriteString(fmt.Sprintf("%*s", digitLen, blankSymbol))
 			} else {
 				builder.WriteString(fmt.Sprintf("%*d", digitLen, value))
 			}
@@ -109,7 +115,7 @@ func (b *Board) String() string {
 	return builder.String()
 }
 
-//---[ Internal Helpers ]-------------------------------------------------------
+// Internal Helpers
 
 func (b *Board) isValidPlacement(row, col, value int) bool {
 	// row & col check: value doesn't elsewhere in row or col
@@ -133,6 +139,4 @@ func (b *Board) isValidPlacement(row, col, value int) bool {
 
 	return true
 }
-
-
 

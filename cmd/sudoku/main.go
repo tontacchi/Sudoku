@@ -10,7 +10,7 @@ import (
 func main() {
 	const NUM_ROWS  = 4
 	const NUM_COLS  = 4
-	const NUM_HINTS = 120
+	const NUM_HINTS = 130
 	const SOLVE_TIME_LIMIT = time.Minute * 2
 
 	fmt.Println("Creating sudoku board...")
